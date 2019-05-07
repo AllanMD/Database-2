@@ -121,3 +121,70 @@ call pGenerarLiquidacion (1);
 -- que pasa si el cliente no tiene facturas ??? 
 
 -- hacer lo de atomicidad // tiene q ver con los aislamientos ? no. es lo de start transaction y commit;
+
+/*2) Crear los triggers necesarios para garantizar las siguientes operaciones :*/
+
+/*Restar el stock de los productos cuando se ingresa un item.*/
+DELIMITER $$
+CREATE TRIGGER TIB_RESTAR_STOCK_PRODUCTOS AFTER INSERT ON items FOR EACH ROW
+BEGIN 
+
+UPDATE productos SET stock = stock - new.cantidad WHERE id_producto = new.id_producto;
+
+END
+$$
+
+insert into items (cantidad, precio_total, id_factura, id_producto) values (100, 2000, 1, 1);
+
+/*No insertar un item si no hay stock del producto seleccionado, además generar un error para identificar el problema.*/
+DELIMITER $$
+CREATE TRIGGER TIB_EVITAR_INSERT_NO_HAY_STOCK BEFORE INSERT ON items FOR EACH ROW
+BEGIN
+
+DECLARE vStock int;
+SELECT stock FROM productos where id_producto = new.id_producto INTO vStock;
+
+IF (vStock < new.cantidad) THEN 
+        SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'NO SE PUEDE INGRESAR ITEM, NO HAY STOCK DEL PRODUCTO';
+END IF;
+
+END
+$$
+
+insert into items (cantidad, precio_total, id_factura, id_producto) values (1000, 2000, 1, 1);
+
+/*Generar un registro en la tabla Alertas, cada vez que un producto quede con menos stock que el stock mínimo.*/
+DELIMITER $$
+
+CREATE TRIGGER TIB_GENERAR_ALERTA_STOCK_MINIMO AFTER UPDATE ON productos FOR EACH ROW
+BEGIN
+
+DECLARE vStock int;
+DECLARE vStock_Minimo int;
+DECLARE vId_Producto int;
+SELECT new.stock INTO vStock;
+SELECT new.stock_minimo INTO vStock_Minimo;
+SELECT new.id_producto INTO vId_Producto;
+
+IF (vStock < vStock_Minimo) THEN
+INSERT INTO alertas (descripcion, fecha) values (CONCAT("El producto con id ", vId_Producto, "tiene stock por debajo del minimo"), now());
+END IF;
+
+END;
+$$
+
+insert into items (cantidad, precio_total, id_factura, id_producto) values (90, 2000, 1, 1);
+
+insert into items (cantidad, precio_total, id_factura, id_producto) values (100, 200, 2, 2);
+
+
+/*3) Crear una vista que liste el total liquidado para cada cliente. En caso de
+que el cliente no tenga liquidaciones asociadas, se debe mostrar 0.*/
+
+CREATE VIEW listar_total_liquidado AS SELECT c.razon_social, IFNULL(sum(l.total),0) as total_liquidado FROM clientes c LEFT OUTER JOIN
+liquidaciones l ON c.id_cliente = l.id_cliente GROUP BY c.razon_social; 
+
+SELECT * FROM listar_total_liquidado;
+
+INSERT INTO liquidaciones (id_cliente, fecha, cantidad_facturas, total) values (1, now(), 1, 200); -- para probar que funciona
