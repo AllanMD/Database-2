@@ -1,0 +1,22 @@
+------------------------1---------------------
+Una compañía aérea necesita una base de datos para registrar la información de sus vuelos.
+Los vuelos están caracterizados por un Id, la fecha y los aeropuertos de origen y destino. Cada
+vuelo es realizado por un avión. Los aviones tienen una matrícula que los identifica, el fabricante,
+un modelo e información sobre su capacidad (número máximo de pasajeros) y autonomía de vuelo
+(en horas). La tripulación asignada al vuelo está formada por el personal de la propia compañía. De
+cada trabajador se conoce su id, su nombre y su categoría profesional, así como el puesto que ocupa
+en cada vuelo en particular.
+Por último, para cada vuelo, se almacena la lista completa de pasajeros, con su dni, el nombre, el
+asiento que ocupa y su clase (turista, primera o business).
+Construye en el modelo conceptual y el modelo lógico correspondientes al enunciado expuesto
+
+-----------------------2------------------------
+En redes sociales como Facebook los perfiles de usuario son una herramienta fundamental. Crea
+una base de datos sencilla que permita almacenarlos.
+Los usuarios tienen un nombre real, su nick (que es único), una clave de acceso y una cuenta de
+correo electrónico. Los usuarios pueden escribir comentarios, los cuales están formados por un
+texto y la fecha de creación. Además, los usuarios pueden aparecer en fotografías. Una fotografía
+tiene un nombre de archivo y una descripción opcional. Para marcar a los usuarios en las
+fotografías, se emplea un marco del que se guardan sus coordenadas.
+Construye en el modelo conceptual y el modelo lógico correspondientes al enunciado expuesto
+
